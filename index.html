@@ -1,40 +1,37 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<title>AR İnşaat Demo</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>AR İnşaat Demo</title>
 
-<script src="https://cdn.babylonjs.com/babylon.js"></script>
-<script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 
-<style>
-html, body {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
-}
-#renderCanvas {
-  width: 100%;
-  height: 100%;
-}
-#info {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  background: rgba(0,0,0,0.6);
-  color: #0f0;
-  padding: 8px;
-  font-size: 12px;
-  z-index: 10;
-}
-</style>
+  <!-- Babylon.js (Android için) -->
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+
+  <!-- Model-Viewer (iOS için fallback) -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
 </head>
-
 <body>
-<div id="info">AR başlatılıyor...</div>
-<canvas id="renderCanvas"></canvas>
+  <!-- Android için Babylon.js canvas -->
+  <canvas id="renderCanvas"></canvas>
 
-<script src="script.js"></script>
+  <!-- iOS için Model-Viewer -->
+  <model-viewer id="iosViewer"
+    src="models/bina.glb"
+    ar
+    auto-rotate
+    camera-controls
+    style="width:100%; height:100%; display:none;">
+  </model-viewer>
+
+  <div id="ui">
+    <button id="arBtn" class="btn">AR moduna gir</button>
+    <div id="status">Hazırlanıyor…</div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
