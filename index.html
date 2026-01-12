@@ -2,49 +2,35 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Babylon AR Demo</title>
-  <!-- Babylon.js CDN -->
+  <title>AR İnşaat Demo</title>
+  <!-- A-Frame ve AR.js -->
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ar.js@3.3.2/aframe/build/aframe-ar.js"></script>
+  <!-- Babylon.js -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body style="margin:0; overflow:hidden;">
+  <!-- AR.js sahnesi -->
+  <a-scene
+    vr-mode-ui="enabled: false"
+    embedded
+    arjs="sourceType: webcam; debugUIEnabled: false;"
+  >
+    <!-- Kamera -->
+    <a-camera gps-camera rotation-reader></a-camera>
+
+    <!-- GPS ile bina modeli -->
+    <a-entity
+      gps-entity-place="latitude: 41.015137; longitude: 28.979530"
+      gltf-model="models/bina.glb"
+      scale="5 5 5"
+    ></a-entity>
+  </a-scene>
+
+  <!-- Babylon.js sahnesi için canvas -->
   <canvas id="renderCanvas" touch-action="none"></canvas>
-
-  <script>
-    // Canvas ve engine
-    const canvas = document.getElementById("renderCanvas");
-    const engine = new BABYLON.Engine(canvas, true);
-
-    // Sahne oluştur
-    const createScene = function () {
-      const scene = new BABYLON.Scene(engine);
-
-      // Kamera
-      const camera = new BABYLON.ArcRotateCamera("camera",
-        Math.PI / 2, Math.PI / 4, 10, BABYLON.Vector3.Zero(), scene);
-      camera.attachControl(canvas, true);
-
-      // Işık
-      const light = new BABYLON.HemisphericLight("light",
-        new BABYLON.Vector3(0, 1, 0), scene);
-
-      // Demo model yükle (örnek bina.glb)
-      BABYLON.SceneLoader.Append("models/", "bina.glb", scene, function (scene) {
-        scene.createDefaultCameraOrLight(true, true, true);
-      });
-
-      return scene;
-    };
-
-    const scene = createScene();
-    engine.runRenderLoop(() => {
-      scene.render();
-    });
-
-    window.addEventListener("resize", () => {
-      engine.resize();
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
-
