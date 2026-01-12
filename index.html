@@ -1,36 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
   <title>AR İnşaat Demo</title>
-  <!-- A-Frame ve AR.js -->
-  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ar.js@3.3.2/aframe/build/aframe-ar.js"></script>
-  <!-- Babylon.js -->
+
+  <!-- Stil dosyası -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Ücretsiz Babylon.js ve GLTF loader (CDN) -->
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
-  <link rel="stylesheet" href="style.css">
 </head>
-<body style="margin:0; overflow:hidden;">
-  <!-- AR.js sahnesi -->
-  <a-scene
-    vr-mode-ui="enabled: false"
-    embedded
-    arjs="sourceType: webcam; debugUIEnabled: false;"
-  >
-    <!-- Kamera -->
-    <a-camera gps-camera rotation-reader></a-camera>
+<body>
+  <!-- Tam ekran canvas -->
+  <canvas id="renderCanvas"></canvas>
 
-    <!-- GPS ile bina modeli -->
-    <a-entity
-      gps-entity-place="latitude: 41.015137; longitude: 28.979530"
-      gltf-model="models/bina.glb"
-      scale="5 5 5"
-    ></a-entity>
-  </a-scene>
+  <!-- Basit UI -->
+  <div id="ui">
+    <button id="arBtn" class="btn">AR moduna gir</button>
+    <button id="placeBtn" class="btn" disabled>Modeli yerleştir</button>
+    <div id="status">Hazırlanıyor…</div>
+  </div>
 
-  <!-- Babylon.js sahnesi için canvas -->
-  <canvas id="renderCanvas" touch-action="none"></canvas>
+  <!-- Uygulama kodu -->
   <script src="script.js"></script>
 </body>
 </html>
