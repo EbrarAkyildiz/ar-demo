@@ -1,104 +1,92 @@
 const canvas = document.getElementById("renderCanvas");
-const iosViewer = document.getElementById("iosViewer");
-const statusEl = document.getElementById("status");
-const arBtn = document.getElementById("arBtn");
-
 const engine = new BABYLON.Engine(canvas, true);
-let scene, xrHelper, building;
 
-// === Hedef koordinat ===
-const siteLat = 41.0082; // Enlem
-const siteLon = 28.9784; // Boylam
+let modelPlaced = false;
+let hitTestSource = null;
 
-function metersPerDegree(lat) {
-  const latMeters = 111320;
-  const lonMeters = 111320 * Math.cos(lat * Math.PI / 180);
-  return { latMeters, lonMeters };
-}
+const createScene = async () => {
+  const scene = new BABYLON.Scene(engine);
+  scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
 
-function geoOffsetToScene(userLat, userLon, targetLat, targetLon) {
-  const m = metersPerDegree(userLat);
-  const dLat = targetLat - userLat;
-  const dLon = targetLon - userLon;
-  const x = dLon * m.lonMeters;
-  const z = -dLat * m.latMeters;
-  return new BABYLON.Vector3(x, 0, z);
-}
+  // Kamera (kilitli)
+  const camera = new BABYLON.FreeCamera(
+    "camera",
+    new BABYLON.Vector3(0, 1.6, 0),
+    scene
+  );
+  camera.detachControl();
 
-async function createScene() {
-  scene = new BABYLON.Scene(engine);
-  scene.createDefaultLight(true);
+  // Işık
+  new BABYLON.HemisphericLight(
+    "light",
+    new BABYLON.Vector3(0, 1, 0),
+    scene
+  );
 
-  await BABYLON.SceneLoader.AppendAsync("models/", "bina.glb", scene);
-  building = scene.meshes[scene.meshes.length - 1];
-  building.scaling.set(0.5, 0.5, 0.5);
-  building.setEnabled(false);
+  // WebXR AR
+  const xr = await scene.createDefaultXRExperienceAsync({
+    uiOptions: { sessionMode: "immersive-ar" },
+    optionalFeatures: true
+  });
 
-  let userPosition = null;
-  try {
-    userPosition = await new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true });
-    });
-  } catch (e) {
-    console.warn("Konum alınamadı:", e);
-  }
+  const sessionManager = xr.baseExperience.sessionManager;
 
-  arBtn.onclick = async () => {
-    // iOS Safari kontrolü
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (isIOS) {
-      // Babylon.js yerine Model-Viewer göster
-      canvas.style.display = "none";
-      iosViewer.style.display = "block";
-      statusEl.textContent = "iOS Quick Look ile AR açılıyor.";
-      return;
-    }
+  // MODELİ YÜKLE (AMA BAŞTA GİZLİ)
+  const result = await BABYLON.SceneLoader.ImportMeshAsync(
+    "",
+    "models/",
+    "bina.glb",
+    scene
+  );
 
-    // Android için Babylon.js WebXR
-    try {
-      xrHelper = await scene.createDefaultXRExperienceAsync({
-        uiOptions: { sessionMode: "immersive-ar" },
-        optionalFeatures: ["hit-test", "anchors"]
+  const modelRoot = result.meshes[0];
+  modelRoot.setEnabled(false);
+
+  // HIT TEST (ZEMİN ALGILAMA)
+  sessionManager.onXRSessionInit.add(() => {
+    sessionManager.session
+      .requestReferenceSpace("viewer")
+      .then(viewerSpace => {
+        sessionManager.session
+          .requestHitTestSource({ space: viewerSpace })
+          .then(source => hitTestSource = source);
       });
+  });
 
-      const featuresManager = xrHelper.baseExperience.featuresManager;
-      const anchors = featuresManager.enableFeature(BABYLON.WebXRAnchorSystem, "latest");
+  sessionManager.onXRFrameObservable.add(() => {
+    if (!hitTestSource || modelPlaced) return;
 
-      let offset = new BABYLON.Vector3(0, 0, 0);
-      if (userPosition) {
-        offset = geoOffsetToScene(
-          userPosition.coords.latitude,
-          userPosition.coords.longitude,
-          siteLat,
-          siteLon
-        );
-      }
+    const frame = sessionManager.currentFrame;
+    const referenceSpace = sessionManager.referenceSpace;
+    const hitTestResults = frame.getHitTestResults(hitTestSource);
 
-      xrHelper.baseExperience.sessionManager.onXRSessionInit.add(() => {
-        const anchor = anchors.addAnchorPoint(new BABYLON.Vector3(0, 0, 0));
-        anchor.onAnchorAddedObservable.add((anchorNode) => {
-          const parent = new BABYLON.TransformNode("buildingAnchor", scene);
-          parent.setParent(anchorNode);
-          parent.position.addInPlace(offset);
+    if (hitTestResults.length > 0) {
+      const hit = hitTestResults[0];
+      const pose = hit.getPose(referenceSpace);
 
-          building.setEnabled(true);
-          building.setParent(parent);
-          statusEl.textContent = "Model yerleştirildi.";
-        });
-      });
+      modelRoot.position.set(
+        pose.transform.position.x,
+        pose.transform.position.y,
+        pose.transform.position.z
+      );
 
-    } catch (err) {
-      console.error("AR başlatılamadı:", err);
-      building.setEnabled(true);
-      statusEl.textContent = "AR yok, 3D modda gösteriliyor.";
+      modelRoot.rotationQuaternion = new BABYLON.Quaternion(
+        pose.transform.orientation.x,
+        pose.transform.orientation.y,
+        pose.transform.orientation.z,
+        pose.transform.orientation.w
+      );
+
+      modelRoot.setEnabled(true);
+      modelPlaced = true; // 🔒 SABİTLENDİ
     }
-  };
+  });
 
   return scene;
-}
+};
 
-(async function init() {
-  await createScene();
-  engine.runRenderLoop(() => scene && scene.render());
-  window.addEventListener("resize", () => engine.resize());
-})();
+createScene().then(scene => {
+  engine.runRenderLoop(() => scene.render());
+});
+
+window.addEventListener("resize", () => engine.resize());
