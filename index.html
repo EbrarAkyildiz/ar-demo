@@ -1,47 +1,40 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>AR Bina Demo</title>
+<meta charset="UTF-8">
+<title>AR İnşaat Demo</title>
 
-  <script src="https://cdn.babylonjs.com/babylon.js"></script>
-  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
+<script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
-      background: black;
-    }
-    #renderCanvas {
-      width: 100%;
-      height: 100%;
-      touch-action: none;
-    }
-    #startAR {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 16px 28px;
-      font-size: 18px;
-      border-radius: 12px;
-      border: none;
-      background: #000;
-      color: #fff;
-      z-index: 10;
-    }
-  </style>
+<style>
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+#renderCanvas {
+  width: 100%;
+  height: 100%;
+}
+#info {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: rgba(0,0,0,0.6);
+  color: #0f0;
+  padding: 8px;
+  font-size: 12px;
+  z-index: 10;
+}
+</style>
 </head>
 
 <body>
-  <button id="startAR">AR Başlat</button>
-  <canvas id="renderCanvas"></canvas>
+<div id="info">AR başlatılıyor...</div>
+<canvas id="renderCanvas"></canvas>
 
-  <script src="script.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
