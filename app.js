@@ -7,7 +7,7 @@ const startBtn = document.getElementById("start");
 startBtn.addEventListener("click", startAR);
 
 async function startAR() {
-
+  
   if (!navigator.xr) {
     alert("WebXR desteklenmiyor");
     return;
