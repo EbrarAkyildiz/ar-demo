@@ -1,73 +1,11 @@
-/* Genel sayfa ayarları */
 html, body {
+  width: 100%;
+  height: 100%;
   margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  background: #000;           /* Siyah arka plan */
   overflow: hidden;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-/* Babylon.js canvas */
-#renderCanvas {
+canvas {
   width: 100%;
   height: 100%;
-  touch-action: none;         /* Mobil dokunma jestleri için */
-  display: block;
-}
-
-/* iOS için Model-Viewer fallback */
-model-viewer {
-  width: 100%;
-  height: 100%;
-  background: #000;
-}
-
-/* Alt kısımda UI paneli */
-#ui {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  justify-content: center;
-  padding: 12px;
-  background: linear-gradient(
-    180deg,
-    rgba(0,0,0,0) 0%,
-    rgba(0,0,0,.6) 40%,
-    rgba(0,0,0,.85) 100%
-  );
-  color: #fff;
-}
-
-/* Butonlar */
-.btn {
-  background: #1f6feb;        /* Mavi buton */
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.btn:hover {
-  background: #1158c7;        /* Hover efekti */
-}
-
-.btn:disabled {
-  background: #555;
-  color: #ddd;
-  cursor: not-allowed;
-}
-
-/* Durum yazısı */
-#status {
-  font-size: 13px;
-  opacity: .9;
 }
