@@ -1,22 +1,15 @@
 const canvas = document.getElementById("renderCanvas");
+const iosViewer = document.getElementById("iosViewer");
 const statusEl = document.getElementById("status");
 const arBtn = document.getElementById("arBtn");
-const placeBtn = document.getElementById("placeBtn");
 
-const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
+const engine = new BABYLON.Engine(canvas, true);
 let scene, xrHelper, building;
 
-// === MODEL YOLU ===
-const MODEL_PATH = "models/";
-const MODEL_FILE = "bina.glb";
+// === Hedef koordinat ===
+const siteLat = 41.0082; // Enlem
+const siteLon = 28.9784; // Boylam
 
-// === HEDEF KOORDİNAT ===
-// Burayı değiştirerek inşaat sahasının GPS konumunu ayarlıyorsun.
-// Örneğin Ankara Kızılay için:
-const siteLat = 41.017476;
-const siteLon = 28.859071;
-
-// Metre-derece dönüşümü
 function metersPerDegree(lat) {
   const latMeters = 111320;
   const lonMeters = 111320 * Math.cos(lat * Math.PI / 180);
@@ -35,30 +28,33 @@ function geoOffsetToScene(userLat, userLon, targetLat, targetLon) {
 async function createScene() {
   scene = new BABYLON.Scene(engine);
   scene.createDefaultLight(true);
-  scene.createDefaultEnvironment({ createGround: true, groundSize: 50 });
 
-  const camera = new BABYLON.ArcRotateCamera("camera", Math.PI / 2, Math.PI / 3, 20, BABYLON.Vector3.Zero(), scene);
-  camera.attachControl(canvas, true);
-
-  // Model yükle
-  await BABYLON.SceneLoader.AppendAsync(MODEL_PATH, MODEL_FILE, scene);
+  await BABYLON.SceneLoader.AppendAsync("models/", "bina.glb", scene);
   building = scene.meshes[scene.meshes.length - 1];
   building.scaling.set(0.5, 0.5, 0.5);
   building.setEnabled(false);
 
-  // Konum izni
   let userPosition = null;
   try {
     userPosition = await new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 15000 });
+      navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true });
     });
-    statusEl.textContent = "Konum alındı.";
   } catch (e) {
-    statusEl.textContent = "Konum alınamadı.";
+    console.warn("Konum alınamadı:", e);
   }
 
-  // AR başlat
   arBtn.onclick = async () => {
+    // iOS Safari kontrolü
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      // Babylon.js yerine Model-Viewer göster
+      canvas.style.display = "none";
+      iosViewer.style.display = "block";
+      statusEl.textContent = "iOS Quick Look ile AR açılıyor.";
+      return;
+    }
+
+    // Android için Babylon.js WebXR
     try {
       xrHelper = await scene.createDefaultXRExperienceAsync({
         uiOptions: { sessionMode: "immersive-ar" },
@@ -66,7 +62,6 @@ async function createScene() {
       });
 
       const featuresManager = xrHelper.baseExperience.featuresManager;
-      const hitTest = featuresManager.enableFeature(BABYLON.WebXRHitTest, "latest");
       const anchors = featuresManager.enableFeature(BABYLON.WebXRAnchorSystem, "latest");
 
       let offset = new BABYLON.Vector3(0, 0, 0);
@@ -79,18 +74,8 @@ async function createScene() {
         );
       }
 
-      let lastHitPose = null;
-      hitTest.onHitTestResultObservable.add((results) => {
-        if (results.length > 0) {
-          lastHitPose = results[0];
-          statusEl.textContent = "Yüzey bulundu. Modeli yerleştirebilirsin.";
-          placeBtn.disabled = false;
-        }
-      });
-
-      placeBtn.onclick = () => {
-        if (!lastHitPose) return;
-        const anchor = anchors.addAnchorPointUsingHitTestResult(lastHitPose);
+      xrHelper.baseExperience.sessionManager.onXRSessionInit.add(() => {
+        const anchor = anchors.addAnchorPoint(new BABYLON.Vector3(0, 0, 0));
         anchor.onAnchorAddedObservable.add((anchorNode) => {
           const parent = new BABYLON.TransformNode("buildingAnchor", scene);
           parent.setParent(anchorNode);
@@ -99,13 +84,13 @@ async function createScene() {
           building.setEnabled(true);
           building.setParent(parent);
           statusEl.textContent = "Model yerleştirildi.";
-          placeBtn.disabled = true;
         });
-      };
+      });
 
     } catch (err) {
-      statusEl.textContent = "AR başlatılamadı, 3D modda gösteriliyor.";
+      console.error("AR başlatılamadı:", err);
       building.setEnabled(true);
+      statusEl.textContent = "AR yok, 3D modda gösteriliyor.";
     }
   };
 
