@@ -2,18 +2,26 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Three.js Import Map Demo</title>
-
+  <title>Web AR GPS Demo</title>
+  <style>
+    html, body { margin:0; height:100%; background:#000; }
+    #canvas { position:fixed; inset:0; }
+    #info { position:fixed; top:10px; left:50%; transform:translateX(-50%);
+            background:#222; color:#fff; padding:8px 12px; border-radius:8px; }
+  </style>
+  <!-- Import map ile bare specifier çözümü -->
   <script type="importmap">
   {
     "imports": {
-      "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
     }
   }
   </script>
-
-  <script type="module" src="./main.js"></script>
 </head>
-<body></body>
+<body>
+  <canvas id="canvas"></canvas>
+  <div id="info">Konum kontrol ediliyor…</div>
+  <script type="module" src="./main.js"></script>
+</body>
 </html>
