@@ -1,0 +1,11 @@
+[
+  {
+    "name": "ornek-proje",
+    "target": { "lat": 41.017040, "lon": 28.858800, "altitude": 0 },
+    "transform": { "scaleMeters": 10, "rotationDeg": 0, "offsetX": 0, "offsetZ": 0 },
+    "render": { "lightIntensity": 1, "shadow": true },
+    "models": [
+      { "name": "ornek.glb", "url": "/assets/models/ornek.glb" }
+    ]
+  }
+]
