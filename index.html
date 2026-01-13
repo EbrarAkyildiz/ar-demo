@@ -1,57 +1,27 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>GPS AR Demo</title>
-
-<style>
-html, body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  background: black;
-}
-#ui {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,.85);
-}
-button {
-  padding: 16px 32px;
-  font-size: 18px;
-  font-weight: bold;
-  border-radius: 12px;
-  border: none;
-  background: #2ecc71;
-  color: black;
-}
-canvas {
-  display: block;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>GPS‑AR Pro</title>
+  <link rel="stylesheet" href="./style.css" />
 </head>
-
 <body>
-<div id="ui">
-  <button id="startBtn">AR BAŞLAT</button>
-</div>
+  <div id="ui">
+    <h1>GPS‑AR Pro</h1>
+    <p id="msg">Hazır</p>
+    <button id="start">AR Başlat</button>
+    <p class="hint">İzinler için butona bas—iOS’ta pusula izni çıkabilir.</p>
+  </div>
 
-<canvas id="canvas"></canvas>
+  <div id="hud">
+    <span id="hud-acc">ACC: —</span>
+    <span id="hud-dist">DIST: —</span>
+    <span id="hud-brg">BRG: —</span>
+  </div>
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://unpkg.com/three@0.155.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.155.0/examples/jsm/"
-  }
-}
-</script>
+  <canvas id="canvas"></canvas>
 
-<script type="module" src="./main.js"></script>
+  <script type="module" src="./main.js"></script>
 </body>
 </html>
