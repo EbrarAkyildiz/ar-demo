@@ -1,4 +1,3 @@
-// Three.js ve GLTFLoader aynı sürümden import edilmeli
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js";
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/loaders/GLTFLoader.js";
 
@@ -29,7 +28,7 @@ navigator.mediaDevices.getUserMedia({ video:{ facingMode:"environment" } })
   scene.background = tex;
 });
 
-// Model yükleme
+// Model yükleme (kök dizindeki bina.glb)
 const loader = new GLTFLoader();
 loader.load("./bina.glb", (gltf)=>{
   const model = gltf.scene;
