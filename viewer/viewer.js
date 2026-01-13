@@ -1,13 +1,18 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { setupRenderer, requestOrientationPermissionIfNeeded, ensureVideoAutoplay, makeVideoTexture, haversineMeters } from "../shared/parite.js";
+import {
+  setupRenderer,
+  requestOrientationPermissionIfNeeded,
+  ensureVideoAutoplay,
+  makeVideoTexture,
+  haversineMeters
+} from "../shared/parite.js";
 
 const canvas = document.getElementById("canvas");
 const startBtn = document.getElementById("start");
 const info = document.getElementById("info");
 
-let renderer, scene, camera, dirLight, hemi, ground, model;
-const loader = new GLTFLoader();
+let renderer, scene, camera, dirLight, hemi, model;
 
 function parseProjectFromURL(){
   const params = new URLSearchParams(location.search);
@@ -20,11 +25,8 @@ async function startAR(){
   const project = parseProjectFromURL();
   if(!project){ info.textContent = "Geçerli proje verisi bulunamadı."; return; }
 
-  // Orientation permission (iOS)
-  const ok = await requestOrientationPermissionIfNeeded();
-  if(!ok){ info.textContent = "Yön izni verilmedi."; }
+  await requestOrientationPermissionIfNeeded();
 
-  // Camera stream
   const stream = await navigator.mediaDevices.getUserMedia({
     video: { facingMode: { ideal: "environment" } }, audio: false
   });
@@ -32,17 +34,14 @@ async function startAR(){
   video.srcObject = stream;
   ensureVideoAutoplay(video);
 
-  // Three setup
   renderer = setupRenderer(canvas);
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(60, canvas.clientWidth/canvas.clientHeight, 0.1, 2000);
   camera.position.set(0,1.6,3);
 
-  // Background as camera feed
   const tex = makeVideoTexture(video);
   scene.background = tex;
 
-  // Lights
   hemi = new THREE.HemisphereLight(0xffffff,0x444444,0.6);
   scene.add(hemi);
 
@@ -52,15 +51,15 @@ async function startAR(){
   dirLight.shadow.mapSize.set(2048,2048);
   scene.add(dirLight);
 
-  ground = new THREE.ShadowMaterial({ opacity:0.35 });
-  const groundMesh = new THREE.Mesh(new THREE.PlaneGeometry(200,200), ground);
+  const groundMat = new THREE.ShadowMaterial({ opacity:0.35 });
+  const groundMesh = new THREE.Mesh(new THREE.PlaneGeometry(200,200), groundMat);
   groundMesh.rotation.x = -Math.PI/2;
   groundMesh.receiveShadow = project.render.shadow;
   scene.add(groundMesh);
 
-  // Load model
   if(project.models && project.models[0]){
-    const url = project.models[0].blobUrl || project.models[0].url;
+    const url = project.models[0].url;
+    const loader = new GLTFLoader();
     loader.load(url, gltf=>{
       model = gltf.scene;
       model.traverse(o=>{
@@ -74,7 +73,6 @@ async function startAR(){
     });
   }
 
-  // Geolocation watch + distance badge
   const badge = document.createElement("div");
   badge.className = "badge";
   badge.textContent = "Konum bekleniyor…";
@@ -89,7 +87,6 @@ async function startAR(){
     console.warn(err);
   }, { enableHighAccuracy:true, maximumAge:1000, timeout:10000 });
 
-  // Render loop
   renderer.setAnimationLoop(()=>renderer.render(scene, camera));
   info.textContent = "AR aktif.";
 }
