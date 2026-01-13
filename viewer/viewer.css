@@ -1,0 +1,8 @@
+:root{ --text:#F8FAFC; --btn:#10B981; }
+*{ box-sizing:border-box }
+body{ margin:0; font-family:system-ui; background:#000; color:var(--text); }
+#ui{ position:fixed; top:12px; left:12px; right:12px; display:flex; gap:8px; align-items:center; z-index:10; }
+.btn{ background:var(--btn); color:#062e25; border:none; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; }
+.info{ font-size:12px; opacity:.85; }
+#canvas{ width:100vw; height:100vh; display:block; }
+.badge{ position:fixed; bottom:12px; left:12px; background:rgba(16,185,129,.15); padding:8px 10px; border-radius:10px; font-size:12px; }
