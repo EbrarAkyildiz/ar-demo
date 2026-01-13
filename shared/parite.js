@@ -1,4 +1,4 @@
-// iOS/Android parite yardımcıları
+import * as THREE from "three";
 
 export function setupRenderer(canvas){
   const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
