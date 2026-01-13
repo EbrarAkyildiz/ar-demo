@@ -2,7 +2,7 @@
   --bg:#0F172A; --panel:#1E293B; --btn:#334155; --primary:#10B981; --text:#F8FAFC;
 }
 *{ box-sizing:border-box }
-body{ margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto; background:var(--bg); color:var(--text); }
+body{ margin:0; font-family:system-ui; background:var(--bg); color:var(--text); }
 .topbar{ background:var(--panel); padding:10px; display:flex; justify-content:space-between; align-items:center; }
 .brand{ font-weight:700; }
 .btn{ background:var(--btn); color:var(--text); border:none; padding:8px 12px; border-radius:8px; cursor:pointer; }
@@ -16,4 +16,6 @@ body{ margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto; backgrou
 .info{ font-size:12px; opacity:.8; margin-top:6px; }
 .share{ margin-top:8px; word-break:break-all; }
 label{ display:block; margin-top:8px; font-size:14px; }
-input[type="range"], input[type="number"], input[type="text"], select{ width:100%; padding:6px; border-radius:8px; border:1px solid #334155; background:#0b1220; color:var(--text); }
+input[type="range"], input[type="number"], input[type="text"], select{
+  width:100%; padding:6px; border-radius:8px; border:1px solid #334155; background:#0b1220; color:var(--text);
+}
