@@ -1,51 +1,57 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <title>GPS AR Demo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>GPS AR Demo</title>
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background: black;
-    }
-    video, canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    #startBtn {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 14px 24px;
-      font-size: 18px;
-      z-index: 10;
-    }
-  </style>
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: black;
+}
+#ui {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.85);
+}
+button {
+  padding: 16px 32px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 12px;
+  border: none;
+  background: #2ecc71;
+  color: black;
+}
+canvas {
+  display: block;
+}
+</style>
 </head>
+
 <body>
+<div id="ui">
+  <button id="startBtn">AR BAŞLAT</button>
+</div>
 
-<video id="camera" autoplay playsinline muted></video>
-<canvas id="arCanvas"></canvas>
+<canvas id="canvas"></canvas>
 
-<button id="startBtn">AR Başlat</button>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.155.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.155.0/examples/jsm/"
+  }
+}
+</script>
 
-<!-- THREE CORE -->
-<script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
-
-<!-- GLTF LOADER (BU ŞART) -->
-<script src="https://unpkg.com/three@0.155.0/examples/js/loaders/GLTFLoader.js"></script>
-
-<!-- ANA DOSYAN -->
-<script src="ios-ar.js"></script>
-
+<script type="module" src="./main.js"></script>
 </body>
 </html>
