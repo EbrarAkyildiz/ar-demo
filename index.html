@@ -1,15 +1,28 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Web AR GPS Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    html, body { margin:0; height:100%; background:#000; }
-    #canvas { position:fixed; inset:0; }
-    #info { position:fixed; top:10px; left:50%; transform:translateX(-50%);
-            background:#222; color:#fff; padding:8px 12px; border-radius:8px; }
+    html, body { margin:0; height:100%; background:#000; font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    #canvas { position:fixed; inset:0; display:block; }
+    #ui {
+      position:fixed; top:12px; left:50%; transform:translateX(-50%);
+      display:flex; gap:8px; align-items:center; z-index:10;
+    }
+    #info {
+      background:#1e1e1e; color:#fff; padding:8px 12px; border-radius:10px; font-size:14px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.35);
+    }
+    #start {
+      background:#3b82f6; color:#fff; border:none; padding:8px 14px; border-radius:10px; font-weight:600;
+      cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.35);
+    }
+    #start:active { transform:translateY(1px); }
   </style>
-  <!-- Import map ile bare specifier çözümü -->
+
+  <!-- Import map: bare specifier'ları çözer -->
   <script type="importmap">
   {
     "imports": {
@@ -21,7 +34,12 @@
 </head>
 <body>
   <canvas id="canvas"></canvas>
-  <div id="info">Konum kontrol ediliyor…</div>
+
+  <div id="ui">
+    <button id="start">AR'ı Başlat</button>
+    <div id="info">Kamera ve konum izni gerekiyor.</div>
+  </div>
+
   <script type="module" src="./main.js"></script>
 </body>
 </html>
