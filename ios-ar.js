@@ -1,56 +1,106 @@
-const video = document.getElementById("camera");
-const canvas = document.getElementById("arCanvas");
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { calcOffset, bearing, toRad } from "./utils.js";
 
-async function startAR() {
-  // Kamera
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "environment" },
-    audio: false
-  });
-  video.srcObject = stream;
-  await video.play();
+export const iosAR = {
+  async start(cfg) {
 
-  // Three.js
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    alpha: true
-  });
-  renderer.setSize(window.innerWidth, window.innerHeight);
+    /* RENDERER */
+    const canvas = document.getElementById("canvas");
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: true,
+      antialias: true
+    });
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(devicePixelRatio);
 
-  const scene = new THREE.Scene();
+    /* SCENE */
+    const scene = new THREE.Scene();
 
-  const camera3D = new THREE.PerspectiveCamera(
-    60,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    10000
-  );
-  camera3D.position.set(0, 1.6, 0);
+    /* CAMERA */
+    const camera = new THREE.PerspectiveCamera(
+      70,
+      innerWidth / innerHeight,
+      0.1,
+      5000
+    );
+    camera.position.set(0, 1.6, 0); // GÖZ HİZASI
 
-  // Işık
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1));
+    /* LIGHT */
+    scene.add(new THREE.AmbientLight(0xffffff, 2));
 
-  // MODEL
-  const loader = new THREE.GLTFLoader();
-  loader.load(
-    "bina.glb",
-    (gltf) => {
-      const model = gltf.scene;
-      model.scale.set(0.3, 0.3, 0.3);
-      model.position.set(0, 0, -5); // kameranın önünde
+    /* CAMERA FEED */
+    const video = document.createElement("video");
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }
+    });
+    video.srcObject = stream;
+    video.setAttribute("playsinline", true);
+    await video.play();
+
+    const videoTex = new THREE.VideoTexture(video);
+    videoTex.colorSpace = THREE.SRGBColorSpace;
+    scene.background = videoTex;
+
+    /* MODEL */
+    let model;
+    const loader = new GLTFLoader();
+    loader.load(cfg.model, gltf => {
+      model = gltf.scene;
+      model.scale.setScalar(cfg.scale);
       scene.add(model);
-    },
-    undefined,
-    (err) => {
-      console.error("MODEL YÜKLENMEDİ", err);
+    });
+
+    /* HEADING */
+    let heading = 0;
+    if (typeof DeviceOrientationEvent?.requestPermission === "function") {
+      const p = await DeviceOrientationEvent.requestPermission();
+      if (p === "granted") {
+        window.addEventListener("deviceorientation", e => {
+          heading = e.webkitCompassHeading ?? (360 - e.alpha);
+        });
+      }
+    } else {
+      window.addEventListener("deviceorientationabsolute", e => {
+        heading = 360 - e.alpha;
+      });
     }
-  );
 
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera3D);
+    /* LOOP */
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (model) {
+        const off = calcOffset(
+          cfg.userLat,
+          cfg.userLon,
+          cfg.lat,
+          cfg.lon
+        );
+
+        const br = bearing(
+          cfg.userLat,
+          cfg.userLon,
+          cfg.lat,
+          cfg.lon
+        );
+
+        const rel = (br - heading + 360) % 360;
+        const dist = Math.hypot(off.x, off.z);
+
+        model.position.set(
+          Math.sin(toRad(rel)) * dist,
+          -1.6,
+          -Math.cos(toRad(rel)) * dist
+        );
+
+        model.rotation.y = toRad(-heading);
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
   }
-  animate();
-}
-
-document.getElementById("startBtn").onclick = startAR;
+};
