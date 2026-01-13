@@ -131,6 +131,31 @@ export const iosAR = {
       updatePlacement();
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
+      
+      window.addEventListener("keydown", (e) => {
+  if (!building) return;
+  switch (e.key) {
+    case "ArrowLeft":
+      building.rotation.y += 0.1; // sola çevir
+      break;
+    case "ArrowRight":
+      building.rotation.y -= 0.1; // sağa çevir
+      break;
+    case "ArrowUp":
+      building.position.z -= 1;   // ileri kaydır
+      break;
+    case "ArrowDown":
+      building.position.z += 1;   // geri kaydır
+      break;
+    case "+":
+      building.scale.multiplyScalar(1.1); // büyüt
+      break;
+    case "-":
+      building.scale.multiplyScalar(0.9); // küçült
+      break;
+  }
+});
+
     }
     animate();
 
