@@ -1,82 +1,56 @@
-const iosAR = {
-  async start(cfg) {
-    const canvas = document.getElementById("canvas");
+const video = document.getElementById("camera");
+const canvas = document.getElementById("arCanvas");
 
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
-    renderer.setSize(innerWidth, innerHeight);
+async function startAR() {
+  // Kamera
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "environment" },
+    audio: false
+  });
+  video.srcObject = stream;
+  await video.play();
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      60,
-      innerWidth / innerHeight,
-      0.1,
-      10000
-    );
-    camera.position.y = 1.6;
+  // Three.js
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    alpha: true
+  });
+  renderer.setSize(window.innerWidth, window.innerHeight);
 
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.2));
+  const scene = new THREE.Scene();
 
-    // Kamera görüntüsü
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" }
-    });
-    const video = document.createElement("video");
-    video.srcObject = stream;
-    video.play();
-    scene.background = new THREE.VideoTexture(video);
+  const camera3D = new THREE.PerspectiveCamera(
+    60,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    10000
+  );
+  camera3D.position.set(0, 1.6, 0);
 
-    // Model
-    const loader = new THREE.GLTFLoader();
-    const gltf = await loader.loadAsync(cfg.model);
-    const building = gltf.scene;
-    building.scale.set(cfg.scale, cfg.scale, cfg.scale);
-    scene.add(building);
+  // Işık
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1));
 
-    let heading = 0;
-    window.addEventListener("deviceorientation", (e) => {
-      if (e.alpha !== null) {
-        heading = heading * 0.9 + (360 - e.alpha) * 0.1;
-      }
-    });
-
-    function calcOffset() {
-      const latM = 111320;
-      const lonM = 111320 * Math.cos(cfg.userLat * Math.PI / 180);
-      return {
-        x: (cfg.lon - cfg.userLon) * lonM,
-        z: -(cfg.lat - cfg.userLat) * latM
-      };
+  // MODEL
+  const loader = new THREE.GLTFLoader();
+  loader.load(
+    "bina.glb",
+    (gltf) => {
+      const model = gltf.scene;
+      model.scale.set(0.3, 0.3, 0.3);
+      model.position.set(0, 0, -5); // kameranın önünde
+      scene.add(model);
+    },
+    undefined,
+    (err) => {
+      console.error("MODEL YÜKLENMEDİ", err);
     }
+  );
 
-    function bearing() {
-      const toRad = d => d * Math.PI / 180;
-      const y = Math.sin(toRad(cfg.lon - cfg.userLon)) * Math.cos(toRad(cfg.lat));
-      const x = Math.cos(toRad(cfg.userLat)) * Math.sin(toRad(cfg.lat)) -
-        Math.sin(toRad(cfg.userLat)) * Math.cos(toRad(cfg.lat)) *
-        Math.cos(toRad(cfg.lon - cfg.userLon));
-      return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-    }
-
-    function update() {
-      const off = calcOffset();
-      const br = bearing();
-      const rel = (br - heading + 360) % 360;
-      const rad = rel * Math.PI / 180;
-      const dist = Math.hypot(off.x, off.z);
-
-      building.position.set(
-        Math.sin(rad) * dist,
-        cfg.altitude,
-        -Math.cos(rad) * dist
-      );
-    }
-
-    function animate() {
-      update();
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    }
-
-    animate();
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera3D);
   }
-};
+  animate();
+}
+
+document.getElementById("startBtn").onclick = startAR;
