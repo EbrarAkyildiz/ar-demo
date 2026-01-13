@@ -6,7 +6,7 @@ const toast = document.getElementById("toast");
 // Senin odandaki test koordinatları
 const CONFIG = {
   id: "deneme_bina",
-  url: "/models/bina.glb",
+  url: "bina.glb",
   lat: 41.017040,
   lon: 28.858800,
   altitude: 82,
