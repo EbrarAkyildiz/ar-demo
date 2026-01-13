@@ -1,31 +1,45 @@
-const gpsAR = {
-  start(cfg) {
+import { androidAR } from "./android-ar.js";
+import { iosAR } from "./ios-ar.js";
+import { haversine, bearing, updateHUD } from "./utils.js";
+
+export const gpsAR = {
+  async start(cfg) {
     const msg = document.getElementById("msg");
-    msg.innerText = "Konum alınıyor...";
-
     const isAndroid = /Android/i.test(navigator.userAgent);
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-    navigator.geolocation.getCurrentPosition(
-      (p) => {
-        cfg.userLat = p.coords.latitude;
-        cfg.userLon = p.coords.longitude;
+    let started = false;
+    return new Promise((resolve, reject) => {
+      const watchId = navigator.geolocation.watchPosition(
+        async (p) => {
+          const { latitude, longitude, accuracy } = p.coords;
+          cfg.userLat = latitude;
+          cfg.userLon = longitude;
 
-        if (p.coords.accuracy > cfg.minAccuracy) {
-          msg.innerText = "GPS hassasiyeti bekleniyor (" +
-            Math.round(p.coords.accuracy) + "m)";
-        }
+          const dist = haversine(latitude, longitude, cfg.lat, cfg.lon);
+          const brg = bearing(latitude, longitude, cfg.lat, cfg.lon);
+          updateHUD({ acc: accuracy, dist, brg });
 
-        document.getElementById("ui").style.display = "none";
+          msg.textContent = `GPS doğruluk: ${Math.round(accuracy)}m`;
 
-        if (isAndroid && navigator.xr) {
-          androidAR.start(cfg);
-        } else {
-          iosAR.start(cfg);
-        }
-      },
-      () => alert("Konum izni gerekli"),
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+          if (!started && accuracy <= cfg.minAccuracy) {
+            started = true;
+            try {
+              if (isAndroid && navigator.xr) {
+                await androidAR.start(cfg);
+              } else {
+                await iosAR.start(cfg);
+              }
+              navigator.geolocation.clearWatch(watchId);
+              resolve();
+            } catch (e) {
+              navigator.geolocation.clearWatch(watchId);
+              reject(e);
+            }
+          }
+        },
+        (err) => reject(new Error("Konum izni/hatası: " + err.message)),
+        { enableHighAccuracy: true, maximumAge: 1000, timeout: 20000 }
+      );
+    });
   }
 };
